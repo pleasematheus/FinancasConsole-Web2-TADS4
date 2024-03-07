@@ -1,8 +1,8 @@
-const fs = require("fs")
-const path = require("path")
+const fs = require('fs')
+const path = require('path')
 
-const chalk = require("chalk")
-const inquirer = require("inquirer")
+const chalk = require('chalk')
+const inquirer = require('inquirer')
 
 let caminhoUsuario
 let usuario
@@ -15,9 +15,15 @@ const lerDadosUsuario = caminho => {
   return JSON.parse(dados)
 }
 
+const contaAtiva = _ => {
+  console.log(`Conta ativa:
+    ${chalk.green(usuario)}
+  `)
+}
+
 function run(username, funcaoMenuPrincipal) {
   console.clear()
-  const caminho = path.join("contas", username + ".json")
+  const caminho = path.join('contas', username + '.json')
 
   if (fs.existsSync(caminho)) {
     caminhoUsuario = caminho
@@ -25,32 +31,33 @@ function run(username, funcaoMenuPrincipal) {
     voltarMenuPrincipal = funcaoMenuPrincipal
     dashboard()
   } else {
-    throw new Exception(chalk.bgRed.white("Usuário não existe!"))
+    throw new Exception(chalk.bgRed.white('Usuário não existe!'))
   }
 }
 
 function dashboard() {
-  console.log(`Conta ativa:
-    ${chalk.green(usuario)}
-  `)
+  contaAtiva()
 
   inquirer
     .prompt([
       {
-        type: "list",
-        name: "opcao",
-        message: "Selecione a opção desejada:",
-        choices: ["Consultar Saldo", "Depositar", "Sacar", "Trocar conta"],
+        type: 'list',
+        name: 'opcao',
+        message: 'Selecione a opção desejada:',
+        choices: ['Consultar Saldo', 'Depositar', 'Sacar', 'Trocar conta'],
       },
     ])
     .then((respostas) => {
-      const resp = respostas["opcao"]
+      const resp = respostas['opcao']
 
-      if (resp === "Consultar Saldo") {
+      if (resp === 'Consultar Saldo') {
+        console.clear()
         consultaSaldo()
-      } else if (resp === "Depositar") {
+      } else if (resp === 'Depositar') {
+        console.clear()
         deposita()
-      } else if (resp === "Sacar") {
+      } else if (resp === 'Sacar') {
+        console.clear()
         saca()
       } else {
         console.log(chalk.bgMagenta.green('Voltando para o menu principal'))
@@ -63,38 +70,40 @@ function dashboard() {
     })
 }
 
-function consultaSaldo() {
+function consultaSaldo(returnMenu = true) {
   const dados = lerDadosUsuario(caminhoUsuario)
 
   console.log(`Saldo da conta: R$ ${dados.saldo.toFixed(2)}\n`)
 
-  dashboard()
+  if(returnMenu) dashboard()
 }
 
 function deposita() {
   inquirer
     .prompt([
       {
-        type: "number",
-        name: "valor",
-        message: "Digite o valor a ser depositado:"
+        type: 'number',
+        name: 'valor',
+        message: 'Digite o valor a ser depositado: '
       }
     ])
     .then((input) => {
       let valor = null
-      if (input["valor"] > 0) {
-        valor = input["valor"]
+      if (input['valor'] > 0) {
+        valor = input['valor']
 
         let dadosUsuario = lerDadosUsuario(caminhoUsuario)
-        let valorFinal = dadosUsuario.saldo += input["valor"]
+        let valorFinal = dadosUsuario.saldo += input['valor']
 
         escreverArquivo(valorFinal)
         console.log(chalk.blueBright(`Valor despositado: R$ ${valor.toFixed(2)}`))
 
         consultaSaldo()
       }
-      else
-        throw new Exception("Digite um valor válido")
+      else{
+        console.log('Digite um valor válido!')
+        dashboard()
+      }
     })
     .catch((e) => {
       console.log(e)
@@ -103,11 +112,45 @@ function deposita() {
 }
 
 function saca() {
-  console.log("### Sacando ###")
-  //Programe a operação de saque aqui
-  /*Não esqueça de invocar a função dashboard() após a execução
-  da operação para o usuário poder continuar operando sua conta */
-  dashboard()
+  let returnMenu = false
+  contaAtiva()
+  consultaSaldo(returnMenu)
+
+  inquirer
+    .prompt([
+      {
+        type: 'number',
+        name: 'valor',
+        message: 'Digite o valor a ser sacado: '
+      }
+    ])
+    .then((input) => {
+      let valor = null
+      if (input['valor'] > 0) {
+        valor = input['valor']
+
+        let dadosUsuario = lerDadosUsuario(caminhoUsuario)
+
+        if (dadosUsuario.saldo < valor) {
+          console.clear()
+          console.log('Valor de saque maior que o disponível!')
+          consultaSaldo()
+        } else {
+          let valorFinal = dadosUsuario.saldo -= input['valor']
+
+          escreverArquivo(valorFinal)
+          console.log(chalk.blueBright(`Valor sacado: R$ ${valor.toFixed(2)}`))
+
+          consultaSaldo()
+        }
+
+      } else {
+        console.log('Digite um valor de saque válido')
+      }
+    })
+    .catch((e) => {
+      console.log(e)
+    })
 }
 
 const escreverArquivo = data => {

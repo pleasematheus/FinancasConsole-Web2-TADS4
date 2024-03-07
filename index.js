@@ -1,17 +1,17 @@
 //Este arquivo simula a tela inicial do sistema
 
-const fs = require("fs")
-const path = require("path")
+const fs = require('fs')
+const path = require('path')
 
-const chalk = require("chalk")
-const inquirer = require("inquirer")
+const chalk = require('chalk')
+const inquirer = require('inquirer')
 
-const crypto = require("crypto")
+const crypto = require('crypto')
 
-const myAccount = require("./myAccount")
+const myAccount = require('./myAccount')
 
-if (!fs.existsSync("contas")) {
-  fs.mkdirSync("contas")
+if (!fs.existsSync('contas')) {
+  fs.mkdirSync('contas')
 }
 
 executar()
@@ -21,14 +21,14 @@ function executar() {
   inquirer
     .prompt([
       {
-        type: "list",
-        name: "opcao",
-        message: "Selecione a opção desejada:",
-        choices: ["Fazer login", "Registrar-se", "Sair"],
+        type: 'list',
+        name: 'opcao',
+        message: 'Selecione a opção desejada:',
+        choices: ['Fazer login', 'Registrar-se', 'Sair'],
       },
     ])
     .then((respostas) => {
-      const resp = respostas["opcao"]
+      const resp = respostas['opcao']
 
       resp === 'Registrar-se' ? registrar() : null
       resp === 'Fazer login' ? logar() : null
@@ -46,20 +46,20 @@ function registrar() {
   inquirer
     .prompt([
       {
-        name: "username",
-        message: "Informe seu username (somente letras, números, hífens e pontos):",
+        name: 'username',
+        message: 'Informe seu username (somente letras, números, hífens e pontos):',
       },
       {
-        name: "senha",
-        message: "Informe sua senha:",
+        name: 'senha',
+        message: 'Informe sua senha:',
       },
     ])
     .then((respostas) => {
-      const username = respostas["username"]
-      const senha = respostas["senha"]
+      const username = respostas['username']
+      const senha = respostas['senha']
 
       if (!username || !senha) {
-        console.log(chalk.bgRed.black("Informe username e senha!"))
+        console.log(chalk.bgRed.black('Informe username e senha!'))
         registrar()
         return
       }
@@ -70,23 +70,23 @@ function registrar() {
 }
 
 function criarUsuario(username, senha) {
-  const caminho = path.join("contas", username + ".json")
+  const caminho = path.join('contas', username + '.json')
 
   if (fs.existsSync(caminho)) {
     console.log(
-      chalk.bgRed.black("Este username já está sendo utilizado, tente outro.")
+      chalk.bgRed.black('Este username já está sendo utilizado, tente outro.')
     )
     registrar()
     return
   }
 
   const dadosConta = {
-    senha: crypto.createHash("sha256").update(senha).digest("hex"),
+    senha: crypto.createHash('sha256').update(senha).digest('hex'),
     saldo: 0,
   }
 
   fs.writeFileSync(caminho, JSON.stringify(dadosConta))
-  console.log(chalk.bgGreen.white("Conta criada com sucesso!"))
+  console.log(chalk.bgGreen.white('Conta criada com sucesso!'))
   executar()
 }
 
@@ -94,20 +94,20 @@ function logar() {
   inquirer
     .prompt([
       {
-        name: "username",
-        message: "Informe seu username (somente letras, números, hífens e pontos):",
+        name: 'username',
+        message: 'Informe seu username (somente letras, números, hífens e pontos):',
       },
       {
-        name: "senha",
-        message: "Informe sua senha:",
+        name: 'senha',
+        message: 'Informe sua senha:',
       },
     ])
     .then((respostas) => {
-      const username = respostas["username"]
-      const senha = respostas["senha"]
+      const username = respostas['username']
+      const senha = respostas['senha']
 
       if (!username || !senha) {
-        console.log(chalk.bgRed.black("Informe username e senha!"))
+        console.log(chalk.bgRed.black('Informe username e senha!'))
         logar()
         return
       }
@@ -118,24 +118,24 @@ function logar() {
 }
 
 function autenticarUsuario(username, senha) {
-  const caminho = path.join("contas", username + ".json")
+  const caminho = path.join('contas', username + '.json')
   if (!fs.existsSync(caminho)) {
-    console.log(chalk.bgRed.black("Username não existe!"))
+    console.log(chalk.bgRed.black('Username não existe!'))
     logar()
     return
   }
 
-  const dadosConta = JSON.parse(fs.readFileSync(caminho, "utf-8"))
+  const dadosConta = JSON.parse(fs.readFileSync(caminho, 'utf-8'))
 
-  const novoHash = crypto.createHash("sha256").update(senha).digest("hex")
+  const novoHash = crypto.createHash('sha256').update(senha).digest('hex')
 
   if (novoHash === dadosConta.senha) {
-    console.log(chalk.bgGreen("Usuário autenticado!"))
+    console.log(chalk.bgGreen('Usuário autenticado!'))
 
     //O módulo myAccount simula a tela do usuário logado com as operações disponíveis para o mesmo
     myAccount(username, executar)
   } else {
-    console.log(chalk.bgRed.black("Senha incorreta! Tente novamente."))
+    console.log(chalk.bgRed.black('Senha incorreta! Tente novamente.'))
     logar()
   }
 }
