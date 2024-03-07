@@ -17,6 +17,7 @@ if (!fs.existsSync("contas")) {
 executar()
 
 function executar() {
+  console.clear()
   inquirer
     .prompt([
       {
@@ -33,7 +34,8 @@ function executar() {
       resp === 'Fazer login' ? logar() : null
 
       if (resp === 'Sair') {
-        console.log('Saindo...')
+        console.clear()
+        console.log(chalk.bgMagenta.green('FinançasConsole finalizado com sucesso...'))
         return
       }
     })
