@@ -47,8 +47,7 @@ function registrar() {
     .prompt([
       {
         name: "username",
-        message:
-          "Informe seu username (somente letras, números, hífens e pontos):",
+        message: "Informe seu username (somente letras, números, hífens e pontos):",
       },
       {
         name: "senha",
@@ -96,8 +95,7 @@ function logar() {
     .prompt([
       {
         name: "username",
-        message:
-          "Informe seu username (somente letras, números, hífens e pontos):",
+        message: "Informe seu username (somente letras, números, hífens e pontos):",
       },
       {
         name: "senha",

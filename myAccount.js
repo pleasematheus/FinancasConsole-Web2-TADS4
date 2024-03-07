@@ -64,8 +64,6 @@ function dashboard() {
 }
 
 function consultaSaldo() {
-  console.log("### Consultando saldo ###")
-
   const dados = lerDadosUsuario(caminhoUsuario)
 
   console.log(`Saldo da conta: R$ ${dados.saldo.toFixed(2)}\n`)
@@ -74,11 +72,34 @@ function consultaSaldo() {
 }
 
 function deposita() {
-  console.log("### Depositando ###")
-  //Programe a operação de depósito aqui
-  /*Não esqueça de invocar a função dashboard() após a execução
-  da operação para o usuário poder continuar operando sua conta */
-  dashboard()
+  inquirer
+    .prompt([
+      {
+        type: "number",
+        name: "valor",
+        message: "Digite o valor a ser depositado:"
+      }
+    ])
+    .then((input) => {
+      let valor = null
+      if (input["valor"] > 0) {
+        valor = input["valor"]
+
+        let dadosUsuario = lerDadosUsuario(caminhoUsuario)
+        let valorFinal = dadosUsuario.saldo += input["valor"]
+
+        escreverArquivo(valorFinal)
+        console.log(chalk.blueBright(`Valor despositado: R$ ${valor.toFixed(2)}`))
+
+        consultaSaldo()
+      }
+      else
+        throw new Exception("Digite um valor válido")
+    })
+    .catch((e) => {
+      console.log(e)
+      dashboard()
+    })
 }
 
 function saca() {
@@ -87,6 +108,13 @@ function saca() {
   /*Não esqueça de invocar a função dashboard() após a execução
   da operação para o usuário poder continuar operando sua conta */
   dashboard()
+}
+
+const escreverArquivo = data => {
+  let conta = lerDadosUsuario(caminhoUsuario)
+  conta.saldo = data
+
+  fs.writeFileSync(caminhoUsuario, JSON.stringify(conta))
 }
 
 module.exports = run
